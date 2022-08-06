@@ -1,0 +1,9 @@
+-: 
+    HitTracker
+    Authors:
+        Museus#7777 | https://twitch.tv/Museus7
+
+    Track hits and damage taken, per chamber and per biome.
+:-
+Load Priority 1
+Import "HitTracker.lua"
