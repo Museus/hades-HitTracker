@@ -1,5 +1,5 @@
 --[[
-    HitTracker v0.2.0
+    HitTracker v0.2.1
     Author:
         Museus (Discord: Museus#7777)
 
@@ -82,6 +82,10 @@ function HitTracker.StartGracePeriod( duration )
 end
 
 function HitTracker.ProcessHit( attacker, damage )
+    if not HitTracker.config.TrackHits then
+        return
+    end
+
     if HitTracker.InGracePeriod then
         return
     end
@@ -130,6 +134,9 @@ function HitTracker.ProcessHit( attacker, damage )
 end
 
 function HitTracker.ProcessDamage( attacker, damage )
+    if not HitTracker.config.TrackDamage then
+        return
+    end
 
     local depth = GetRunDepth( CurrentRun )
     local biomeName = CurrentRun.CurrentRoom.RoomSetName
@@ -161,13 +168,13 @@ function HitTracker.ProcessDamage( attacker, damage )
 end
 
 function HitTracker.Display()
+    if not (HitTracker.config.TrackHits or HitTracker.config.TrackDamage) then
+        return
+    end
+
     local y_pos = 90
     if RtaTimer ~= nil and RtaTimer.Running then
         y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize
-    end
-
-    if not (HitTracker.config.TrackHits or HitTracker.config.TrackDamage) then
-        return
     end
 
     local depth = GetRunDepth( CurrentRun )
@@ -253,7 +260,7 @@ end
 ModUtil.WrapBaseFunction("WindowDropEntrance", function( baseFunc, ... )
     local val = baseFunc(...)
 
-    if HitTracker.config.TrackHits or HitTracker.config.TrackDamage then
+    if HitTracker ~= nil and (HitTracker.config.TrackHits or HitTracker.config.TrackDamage) then
         HitTracker.InitializeTracker()
         HitTracker.Display()
     end
@@ -264,7 +271,7 @@ end, HitTracker)
 -- Scripts/RoomManager.lua : 1874
 ModUtil.WrapBaseFunction("StartRoom", function ( baseFunc, currentRun, currentRoom )
     DebugPrint({ Text = "Starting room." })
-    if HitTracker.config.TrackHits or HitTracker.config.TrackDamage then
+    if HitTracker ~= nil and (HitTracker.config.TrackHits or HitTracker.config.TrackDamage) then
         if not HitTracker.Initialized then
             HitTracker.InitializeTracker()
         end
