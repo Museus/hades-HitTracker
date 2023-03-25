@@ -124,7 +124,7 @@ function HitTracker.HitIsException( attacker, damage, weaponName )
 
     -- Invulnerable for whatever reason
     for invulnerabilityFlag, isFlagActive in pairs(CurrentRun.Hero.InvulnerableFlags) do
-        if isFlagActive and isFlagActive ~= "ShieldFireSelfInvulnerable" then
+        if isFlagActive and invulnerabilityFlag ~= "ShieldFireSelfInvulnerable" and invulnerabilityFlag ~= "Frame" and invulnerabilityFlag ~= "LastStand"  then
             HitTracker.Log( "Ignoring hit while invulnerability flag " .. invulnerabilityFlag .. " is set." )
             return true
         end
