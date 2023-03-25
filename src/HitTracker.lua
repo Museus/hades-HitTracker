@@ -54,6 +54,7 @@ function HitTracker.InitializeDepth( depth )
         HitTracker.Hits.Depth[depth] = {}
     end
 
+
     if HitTracker.Damage.Depth[depth] == nil then
         HitTracker.Damage.Depth[depth] = {}
         HitTracker.Damage.Depth[depth].Total = 0
@@ -309,15 +310,15 @@ OnHit{
 }
 
 OnWeaponFired{
-	function( triggerArgs )
+    function( triggerArgs )
         -- chaos curse effects
-		if triggerArgs.OwnerTable == CurrentRun.Hero and not CurrentRun.Hero.Frozen then
-			for i, data in pairs(GetHeroTraitValues("DamageOnFireWeapons")) do
-				if Contains( data.WeaponNames, triggerArgs.name ) then
-					HitTracker.ProcessHit( "Chaos Curse (" .. triggerArgs.name .. ")", data.Damage )
-				end
-			end
-		end
+        if triggerArgs.OwnerTable == CurrentRun.Hero and not CurrentRun.Hero.Frozen then
+            for i, data in pairs(GetHeroTraitValues("DamageOnFireWeapons")) do
+                if Contains( data.WeaponNames, triggerArgs.name ) then
+                    HitTracker.ProcessHit( "Chaos Curse (" .. triggerArgs.name .. ")", data.Damage )
+                end
+            end
+        end
     end
 }
 
