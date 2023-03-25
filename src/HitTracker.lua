@@ -106,7 +106,7 @@ function HitTracker.ProcessHit( attacker, damage, blocked )
     end
 
     -- Don't count walking on lava without taking damage
-    if string.starts(attacker, "LavaTile") and damage == 0 then
+    if (string.starts(attacker, "Lava") or string.starts(attacker, "EliteLava")) and damage == 0 then
         HitTracker.Log( "Ignoring 0 damage lava hit." )
         return
     end
