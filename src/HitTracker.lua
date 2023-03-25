@@ -6,7 +6,7 @@
     Track Hits and Damage taken per chamber, per biome, and per run.
     Customizable grace period after each hit.
 ]]
-ModUtil.RegisterMod("HitTracker")
+ModUtil.Mod.Register("HitTracker")
 
 local config = {
     Enabled = true, -- If false, mod does nothing
@@ -314,7 +314,7 @@ function HitTracker.Display()
     end
 end
 
-ModUtil.WrapBaseFunction("WindowDropEntrance", function( baseFunc, ... )
+ModUtil.Path.Wrap("WindowDropEntrance", function( baseFunc, ... )
     local val = baseFunc(...)
 
     if HitTracker ~= nil and (HitTracker.config.TrackHits or HitTracker.config.TrackDamage) then
@@ -326,7 +326,7 @@ ModUtil.WrapBaseFunction("WindowDropEntrance", function( baseFunc, ... )
 end, HitTracker)
 
 -- Scripts/RoomManager.lua : 1874
-ModUtil.WrapBaseFunction("StartRoom", function ( baseFunc, currentRun, currentRoom )
+ModUtil.Path.Wrap("StartRoom", function ( baseFunc, currentRun, currentRoom )
     DebugPrint({ Text = "Starting room." })
     if HitTracker ~= nil and (HitTracker.config.TrackHits or HitTracker.config.TrackDamage) then
         if not HitTracker.Initialized then
@@ -340,7 +340,7 @@ ModUtil.WrapBaseFunction("StartRoom", function ( baseFunc, currentRun, currentRo
 end, HitTracker)
 
 -- Scripts/UIScripts.lua : 145
-ModUtil.WrapBaseFunction("ShowCombatUI", function ( baseFunc, flag )
+ModUtil.Path.Wrap("ShowCombatUI", function ( baseFunc, flag )
     if HitTracker ~= nil and (HitTracker.config.TrackHits or HitTracker.config.TrackDamage) then
         if not HitTracker.Initialized then
             HitTracker.InitializeTracker()
@@ -404,7 +404,7 @@ OnProjectileDeath{
 }
 
 -- Scripts/Combat.lua : 723
-ModUtil.WrapBaseFunction("DamageHero", function ( baseFunc, victim, triggerArgs )
+ModUtil.Path.Wrap("DamageHero", function ( baseFunc, victim, triggerArgs )
     HitTracker.ProcessDamage( triggerArgs.AttackerName, triggerArgs.DamageAmount)
     baseFunc( victim, triggerArgs )
 end, HitTracker)
