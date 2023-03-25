@@ -108,7 +108,9 @@ function HitTracker.ProcessHit( attacker, damage )
         end
     end
 
-    thread(HitTracker.StartGracePeriod)
+    if HitTracker.config.GracePeriodDuration > 0 then
+        thread(HitTracker.StartGracePeriod)
+    end
 
     local depth = GetRunDepth( CurrentRun )
     local biomeName = CurrentRun.CurrentRoom.RoomSetName
