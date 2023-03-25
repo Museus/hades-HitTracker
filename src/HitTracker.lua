@@ -102,7 +102,7 @@ function HitTracker.HitIsException( attacker, damage, weaponName )
     end
 
     -- Walking on Lava before damage starts ticking up
-    if (string.starts(weaponName, "Lava") or string.starts(weaponName, "EliteLava")) and damage == 0 then
+    if (string.starts(weaponName, "Lava") or string.starts(weaponName, "EliteLava") or string.starts(weaponName, "HydraLava")) and damage == 0 then
         HitTracker.Log( "Ignoring 0 damage lava hit." )
         return true
     end
