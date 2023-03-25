@@ -96,10 +96,23 @@ function HitTracker.StartGracePeriod( duration )
     HitTracker.InGracePeriod = false
 end
 
-function HitTracker.HitIsException( attacker, damage )
+function HitTracker.HitIsException( attacker, damage, weaponName )
+    if weaponName == nil or weaponName == "" then
+        weaponName = attacker
+    end
+
     -- Walking on Lava before damage starts ticking up
-    if (string.starts(attacker, "Lava") or string.starts(attacker, "EliteLava")) and damage == 0 then
+    if (string.starts(weaponName, "Lava") or string.starts(weaponName, "EliteLava")) and damage == 0 then
         HitTracker.Log( "Ignoring 0 damage lava hit." )
+        return true
+    end
+
+    -- Walking on Poison before damage starts ticking up
+    if (
+        (string.starts(weaponName, "Poison") or string.starts(weaponName, "RatPoison") or string.starts(weaponName, "RatDeath"))
+        and damage == 0
+    ) then
+        HitTracker.Log( "Ignoring 0 damage poison hit." )
         return true
     end
 
@@ -120,12 +133,12 @@ function HitTracker.HitIsException( attacker, damage )
     return false
 end
 
-function HitTracker.ProcessHit( attacker, damage, blocked )
+function HitTracker.ProcessHit( attacker, damage, weaponName, blocked )
     if not HitTracker.config.TrackHits then
         return
     end
 
-    if HitTracker.InGracePeriod or HitTracker.HitIsException( attacker, damage ) then
+    if HitTracker.InGracePeriod or HitTracker.HitIsException( attacker, damage, weaponName ) then
         return
     end
 
@@ -364,7 +377,8 @@ OnHit{
         if victim ~= nil and victim == CurrentRun.Hero then
             local attackerName = triggerArgs.AttackerName
             local damageAmount = triggerArgs.DamageAmount
-            HitTracker.ProcessHit( attackerName, damageAmount, false )
+            local weaponName = triggerArgs.SourceWeapon
+            HitTracker.ProcessHit( attackerName, damageAmount, weaponName, false )
         end
     end
 }
@@ -375,7 +389,7 @@ OnWeaponFired{
         if triggerArgs.OwnerTable == CurrentRun.Hero and not CurrentRun.Hero.Frozen then
             for i, data in pairs(GetHeroTraitValues("DamageOnFireWeapons")) do
                 if Contains( data.WeaponNames, triggerArgs.name ) then
-                    HitTracker.ProcessHit( "Chaos Curse (" .. triggerArgs.name .. ")", data.Damage, false )
+                    HitTracker.ProcessHit( "Chaos Curse (" .. triggerArgs.name .. ")", data.Damage, triggerArgs.name, false )
                 end
             end
         end
@@ -385,7 +399,7 @@ OnWeaponFired{
 OnProjectileBlock{
     function( triggerArgs )
         if triggerArgs.triggeredById == CurrentRun.Hero.ObjectId and triggerArgs.WeaponName == "ShieldWeaponRush" then
-            HitTracker.ProcessHit( triggerArgs.WeaponName, 0, true )
+            HitTracker.ProcessHit( triggerArgs.WeaponName, 0, triggerArgs.WeaponName, true )
         end
     end
 }
@@ -404,7 +418,7 @@ OnProjectileReflect{
 OnProjectileDeath{
     function( triggerArgs )
         if triggerArgs.IsDeflected then
-            HitTracker.ProcessHit( "Deflected " .. triggerArgs.WeaponName, 0, false )
+            HitTracker.ProcessHit( "Deflected " .. triggerArgs.WeaponName, 0, triggerArgs.WeaponName, false )
         end
     end
 }
