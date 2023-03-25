@@ -12,6 +12,7 @@ local config = {
     Enabled = true, -- If false, mod does nothing
     TrackHits = true, -- If true, log all hits taken
     TrackDamage = true, -- If true, log all damage taken
+    DisplayBiomes = false, -- If true, display per-biome breakdown
     GracePeriodDuration = 1, -- Duration in seconds to ignore consecutive hits
 }
 HitTracker.config = config
@@ -189,12 +190,11 @@ function HitTracker.Display()
         HitTracker.InitializeBiome( biomeName )
     end
 
-
-    if HitTracker.config.TrackHits then
+    if HitTracker.config.TrackHits and HitTracker.config.DisplayBiomes then
         local hitsInBiome = #HitTracker.Hits.Biome[biomeName]
         PrintUtil.createOverlayLine(
             "HitTracker_HitsBiome",
-            "Hits Taken in " .. biomeName .. ": " .. hitsInBiome,
+            "Hits in " .. biomeName .. ": " .. hitsInBiome,
             MergeTables(
                 UIData.CurrentRunDepth.TextFormat,
                 {
@@ -207,12 +207,12 @@ function HitTracker.Display()
 
         y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize + 5
     end
-    
-    if HitTracker.config.TrackDamage then
+
+    if HitTracker.config.TrackDamage and HitTracker.config.DisplayBiomes then
         local damageInBiome = HitTracker.Damage.Biome[biomeName].Total
         PrintUtil.createOverlayLine(
             "HitTracker_DamageBiome",
-            "Damage Taken in " .. biomeName .. ": " .. damageInBiome,
+            "Damage in " .. biomeName .. ": " .. damageInBiome,
             MergeTables(
                 UIData.CurrentRunDepth.TextFormat,
                 {
@@ -229,7 +229,7 @@ function HitTracker.Display()
     if HitTracker.config.TrackHits then
         PrintUtil.createOverlayLine(
             "HitTracker_HitsTotal",
-            "Total Hits Taken: " .. HitTracker.Hits.Total,
+            "Total Hits: " .. HitTracker.Hits.Total,
             MergeTables(
                 UIData.CurrentRunDepth.TextFormat,
                 {
@@ -246,7 +246,7 @@ function HitTracker.Display()
     if HitTracker.config.TrackDamage then
         PrintUtil.createOverlayLine(
             "HitTracker_DamageTotal",
-            "Total Damage Taken: " .. HitTracker.Damage.Total,
+            "Total Damage: " .. HitTracker.Damage.Total,
             MergeTables(
                 UIData.CurrentRunDepth.TextFormat,
                 {
