@@ -13,6 +13,7 @@ local config = {
     TrackHits = true, -- If true, log all hits taken
     TrackDamage = true, -- If true, log all damage taken
     DisplayBiomes = false, -- If true, display per-biome breakdown
+    BlocksSeparate = true, -- If true, add a separate line for blocks
     GracePeriodDuration = 1, -- Duration in seconds to ignore consecutive hits
 }
 HitTracker.config = config
@@ -29,6 +30,11 @@ end
 
 function HitTracker.InitializeTracker()
     HitTracker.Hits = {
+        Depth = {},
+        Biome = {},
+        Total = 0,
+    }
+    HitTracker.Blocks = {
         Depth = {},
         Biome = {},
         Total = 0,
@@ -54,6 +60,9 @@ function HitTracker.InitializeDepth( depth )
         HitTracker.Hits.Depth[depth] = {}
     end
 
+    if HitTracker.Blocks.Depth[depth] == nil then
+        HitTracker.Blocks.Depth[depth] = {}
+    end
 
     if HitTracker.Damage.Depth[depth] == nil then
         HitTracker.Damage.Depth[depth] = {}
@@ -64,6 +73,10 @@ end
 function HitTracker.InitializeBiome( biome )
     if HitTracker.Hits.Biome[biome] == nil then
         HitTracker.Hits.Biome[biome] = {}
+    end
+
+    if HitTracker.Blocks.Biome[biome] == nil then
+        HitTracker.Blocks.Biome[biome] = {}
     end
 
     if HitTracker.Damage.Biome[biome] == nil then
@@ -83,7 +96,7 @@ function HitTracker.StartGracePeriod( duration )
     HitTracker.InGracePeriod = false
 end
 
-function HitTracker.ProcessHit( attacker, damage )
+function HitTracker.ProcessHit( attacker, damage, blocked )
     if not HitTracker.config.TrackHits then
         return
     end
@@ -132,6 +145,12 @@ function HitTracker.ProcessHit( attacker, damage )
     table.insert(HitTracker.Hits.Depth[depth], hitEntry)
     table.insert(HitTracker.Hits.Biome[biomeName], hitEntry)
     HitTracker.Hits.Total = HitTracker.Hits.Total + 1
+
+    if blocked then
+        table.insert(HitTracker.Blocks.Depth[depth], hitEntry)
+        table.insert(HitTracker.Blocks.Biome[biomeName], hitEntry)
+        HitTracker.Blocks.Total = HitTracker.Blocks.Total + 1
+    end
 
     HitTracker.Display()
     HitTracker.Log("Tracked hit for " .. damage .. " damage (pre-modifiers) by " .. attacker)
@@ -209,6 +228,24 @@ function HitTracker.Display()
         y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize + 5
     end
 
+    if HitTracker.config.TrackHits and HitTracker.config.BlocksSeparate and HitTracker.config.DisplayBiomes then
+        local blocksInBiome = #HitTracker.Blocks.Biome[biomeName]
+        PrintUtil.createOverlayLine(
+            "HitTracker_BlocksBiome",
+            "Hits Blocked in " .. biomeName .. ": " .. blocksInBiome,
+            MergeTables(
+                UIData.CurrentRunDepth.TextFormat,
+                {
+                    justification = "right",
+                    x_pos = 1903,
+                    y_pos = y_pos,
+                }
+            )
+        )
+
+        y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize + 5
+    end
+
     if HitTracker.config.TrackDamage and HitTracker.config.DisplayBiomes then
         local damageInBiome = HitTracker.Damage.Biome[biomeName].Total
         PrintUtil.createOverlayLine(
@@ -231,6 +268,23 @@ function HitTracker.Display()
         PrintUtil.createOverlayLine(
             "HitTracker_HitsTotal",
             "Total Hits: " .. HitTracker.Hits.Total,
+            MergeTables(
+                UIData.CurrentRunDepth.TextFormat,
+                {
+                    justification = "right",
+                    x_pos = 1903,
+                    y_pos = y_pos,
+                }
+            )
+        )
+
+        y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize + 5
+    end
+
+    if HitTracker.config.TrackHits and HitTracker.config.BlocksSeparate then
+        PrintUtil.createOverlayLine(
+            "HitTracker_BlocksTotal",
+            "Total Blocks: " .. HitTracker.Blocks.Total,
             MergeTables(
                 UIData.CurrentRunDepth.TextFormat,
                 {
@@ -304,7 +358,7 @@ OnHit{
         if victim ~= nil and victim == CurrentRun.Hero then
             local attackerName = triggerArgs.AttackerName
             local damageAmount = triggerArgs.DamageAmount
-            HitTracker.ProcessHit( attackerName, damageAmount )
+            HitTracker.ProcessHit( attackerName, damageAmount, false )
         end
     end
 }
@@ -315,7 +369,7 @@ OnWeaponFired{
         if triggerArgs.OwnerTable == CurrentRun.Hero and not CurrentRun.Hero.Frozen then
             for i, data in pairs(GetHeroTraitValues("DamageOnFireWeapons")) do
                 if Contains( data.WeaponNames, triggerArgs.name ) then
-                    HitTracker.ProcessHit( "Chaos Curse (" .. triggerArgs.name .. ")", data.Damage )
+                    HitTracker.ProcessHit( "Chaos Curse (" .. triggerArgs.name .. ")", data.Damage, false )
                 end
             end
         end
@@ -325,7 +379,7 @@ OnWeaponFired{
 OnProjectileBlock{
     function( triggerArgs )
         if triggerArgs.triggeredById == CurrentRun.Hero.ObjectId and triggerArgs.WeaponName == "ShieldWeaponRush" then
-            HitTracker.ProcessHit( triggerArgs.WeaponName, 0 )
+            HitTracker.ProcessHit( triggerArgs.WeaponName, 0, true )
         end
     end
 }
@@ -344,7 +398,7 @@ OnProjectileReflect{
 OnProjectileDeath{
     function( triggerArgs )
         if triggerArgs.IsDeflected then
-            HitTracker.ProcessHit( "Deflected " .. triggerArgs.WeaponName, 0 )
+            HitTracker.ProcessHit( "Deflected " .. triggerArgs.WeaponName, 0, false )
         end
     end
 }
