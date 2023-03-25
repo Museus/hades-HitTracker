@@ -96,31 +96,37 @@ function HitTracker.StartGracePeriod( duration )
     HitTracker.InGracePeriod = false
 end
 
+function HitTracker.HitIsException( attacker, damage )
+    -- Walking on Lava before damage starts ticking up
+    if (string.starts(attacker, "Lava") or string.starts(attacker, "EliteLava")) and damage == 0 then
+        HitTracker.Log( "Ignoring 0 damage lava hit." )
+        return true
+    end
+
+    -- Standing in a gas trap
+    if string.starts(attacker, "GasTrap") and damage == 0 then
+        HitTracker.Log( "Ignoring gas trap." )
+        return true
+    end
+
+    -- Invulnerable for whatever reason
+    for invulnerabilityFlag, isFlagActive in pairs(CurrentRun.Hero.InvulnerableFlags) do
+        if isFlagActive and isFlagActive ~= "ShieldFireSelfInvulnerable" then
+            HitTracker.Log( "Ignoring hit while invulnerability flag " .. invulnerabilityFlag .. " is set." )
+            return true
+        end
+    end
+
+    return false
+end
+
 function HitTracker.ProcessHit( attacker, damage, blocked )
     if not HitTracker.config.TrackHits then
         return
     end
 
-    if HitTracker.InGracePeriod then
+    if HitTracker.InGracePeriod or HitTracker.HitIsException( attacker, damage ) then
         return
-    end
-
-    -- Don't count walking on lava without taking damage
-    if (string.starts(attacker, "Lava") or string.starts(attacker, "EliteLava")) and damage == 0 then
-        HitTracker.Log( "Ignoring 0 damage lava hit." )
-        return
-    end
-
-    if string.starts(attacker, "GasTrap") and damage == 0 then
-        HitTracker.Log( "Ignoring gas trap." )
-        return
-    end
-
-    for invulnerabilityFlag, isFlagActive in pairs(CurrentRun.Hero.InvulnerableFlags) do
-        if isFlagActive and isFlagActive ~= "ShieldFireSelfInvulnerable" then
-            HitTracker.Log( "Ignoring hit while invulnerability flag " .. invulnerabilityFlag .. " is set." )
-            return
-        end
     end
 
     if HitTracker.config.GracePeriodDuration > 0 then
