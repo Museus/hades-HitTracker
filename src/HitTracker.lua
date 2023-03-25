@@ -176,7 +176,7 @@ function HitTracker.Display()
 
     local y_pos = 90
     if RtaTimer ~= nil and RtaTimer.Running then
-        y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize
+        y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize + 5
     end
 
     local depth = GetRunDepth( CurrentRun )
@@ -205,7 +205,7 @@ function HitTracker.Display()
             )
         )
 
-        y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize
+        y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize + 5
     end
     
     if HitTracker.config.TrackDamage then
@@ -223,7 +223,7 @@ function HitTracker.Display()
             )
         )
 
-        y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize
+        y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize + 5
     end
 
     if HitTracker.config.TrackHits then
@@ -240,7 +240,7 @@ function HitTracker.Display()
             )
         )
 
-        y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize
+        y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize + 5
     end
 
     if HitTracker.config.TrackDamage then
