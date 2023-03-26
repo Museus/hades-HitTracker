@@ -172,7 +172,7 @@ function HitTracker.ProcessHit( attacker, damage, weaponName, blocked )
     end
 
     HitTracker.Display()
-    HitTracker.Log("Tracked hit for " .. damage .. " damage (pre-modifiers) by " .. attacker)
+    HitTracker.Log("Tracked hit for " .. damage .. " damage (pre-modifiers) by " .. attacker .. " with weapon " .. weaponName )
 end
 
 function HitTracker.ProcessDamage( attacker, damage )
@@ -214,7 +214,7 @@ function HitTracker.Display()
         return
     end
 
-    local y_pos = 90
+    local y_pos = 240
     if RtaTimer ~= nil and RtaTimer.Running then
         y_pos = y_pos + UIData.CurrentRunDepth.TextFormat.FontSize + 5
     end
